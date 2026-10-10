@@ -2,11 +2,14 @@
 
 namespace pr1.Models;
 
-public class Customer : Technologia
+public class Customer : Entity
 {
+    public string Name { get; set; }
     public string Email { get; set; }
-    public Customer(int id, string name, string email) : base(id, name,0)
+
+    public Customer(int id, string name, string email) : base(id)
     {
+        Name = name;
         Email = email;
     }
 }

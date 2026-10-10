@@ -3,10 +3,14 @@ using pr1.Base;
 
 namespace pr1.Models;
 
-public class Order
+public class Order : Entity
 {
-    public int OrderId { get; set; }        
     public Customer Buyer { get; set; }
-    public List<Technologia> Products { get; set; } = new List<Technologia>();
+    public List<Technologia> Products { get; set; } = new();
     public decimal TotalPrice { get; set; }
+
+    public Order(int id, Customer buyer) : base(id)
+    {
+        Buyer = buyer;
+    }
 }
