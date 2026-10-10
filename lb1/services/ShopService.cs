@@ -7,68 +7,78 @@ namespace pr2.Service;
 
 public class ShopService
 {
-    private List<Technologia> _products = new List<Technologia>();
-    private List<Order> _orders = new List<Order>();
+    private readonly Repository<Technologia> _productRepository = new();
+    private readonly Repository<Order> _orderRepository = new();
 
-    public void addProduct(Technologia product)
+    public void AddProduct(Technologia product)
     {
-        foreach (var Product in _products)
+        if (Validation.IsEmpty(product.Name))
         {
-            if (Product.Id == product.Id)
-            {
-                Console.WriteLine($"Продукт {product.Name} з ID {product.Id} вже існує");
-                return;
-            }
+            Console.WriteLine("Назва продукту не може бути порожньою!");
+            return;
         }
 
-        if (string.IsNullOrEmpty(product.Name))
+        if (_productRepository.GetById(product.Id) != null)
         {
-            Console.WriteLine($"Назва продукту не може бути порожньою");
-                return;
+            Console.WriteLine($"Продукт з ID {product.Id} вже існує!");
+            return;
         }
-        _products.Add(product);
-        Console.WriteLine($"Продукт {product.Name} з айді {product.Id} успішно додано");
+
+        if (!Validation.IsPositivePrice(product.Price))
+        {
+            Console.WriteLine($"Ціна в товара {product.Name} з ID: {product.Id} - не може бути від'ємною!");
+            return;
+        }
+        _productRepository.Add(product);
+        Console.WriteLine($"Продукт '{product.Name}', ID: {product.Id} додано");
     }
 
-    public Technologia searchProducts(int id)
+    public Technologia? SearchProduct(int id)
     {
-        foreach (var product in _products)
-        {
-                if (product.Id == id)
-                {
-                    return product;
-                }
-
-        }
-                return null;
+       return _productRepository.GetById(id);
     }
+    
     
     public bool DeleteProduct(int id)
     {
-        var product = searchProducts(id);
-        if (product != null)
+        bool removed = _productRepository.Remove(id);
+        if (removed)
         {
-            _products.Remove(product);
-            Console.WriteLine($"Товар {product.Name} з Id {id} видалено.");
-            return true;
+            Console.WriteLine($"Товар з ID {id} успішно видалено");
         }
-        Console.WriteLine($"Товар з ID {id} не знайдено для видалення.");
-        return false;
+        else{
+            Console.WriteLine($"Товар з ID {id} не знайдено");
+        }
+        return removed;
+    }
+
+    public void PrintAllProducts()
+    {
+        var products = _productRepository.GetAll();
+
+        if (products.Count == 0)
+        {
+            Console.WriteLine("Список порожній - товарів немає");
+            return;
+        }
+
+        Console.WriteLine("----- Список товарів -----");
+        foreach (var product in products)
+        {
+            product.GetDescription();
+        }
+        Console.WriteLine("---------------------------\n");
     }
     
-    public void CreateOrder(int orderId, Customer customer, List<int> productIds)
+    public void CreateOrder(Customer customer, List<int> productIds)
     {
-        Order newOrder = new Order
-        {
-            OrderId = orderId,
-            Buyer = customer
-        };
-
+        int orderId = IdGenerator.NextId();
+        Order newOrder = new Order(orderId, customer);
         decimal total = 0;
 
         foreach (var id in productIds)
         {
-            var product = searchProducts(id);
+            var product = _productRepository.GetById(id);
             if (product != null)
             {
                 newOrder.Products.Add(product);
@@ -76,30 +86,26 @@ public class ShopService
             }
             else
             {
-                Console.WriteLine($"Товар з ID {id} відсутній! Його неможливо додати в список.");
+                Console.WriteLine($"Товар з ID {id} відсутній!");
             }
         }
 
         if (newOrder.Products.Count == 0)
         {
-            Console.WriteLine("Список товарів порожній.");
+            Console.WriteLine("Не вдалося створити замовлення: список товарів порожній.");
             return;
         }
 
         newOrder.TotalPrice = total;
-        _orders.Add(newOrder);
+        _orderRepository.Add(newOrder);
 
-
-        Console.WriteLine($"Чек замовлення {orderId}");
-        Console.WriteLine($"Покупець: {customer.Name}, {customer.Email}");
-        Console.WriteLine("Товари в замовленні:");
-        foreach (var product in newOrder.Products)
+        Console.WriteLine($"\n--- Чек замовлення N{orderId} ---");
+        Console.WriteLine($"Покупець: {customer.Name} - {customer.Email} - {customer.Id}");
+        Console.WriteLine("Товари:");
+        foreach (var p in newOrder.Products)
         {
-            product.GetDescription();
+            p.GetDescription();
         }
-        Console.WriteLine($"Оплата: {newOrder.TotalPrice}.");
+        Console.WriteLine($"Загальна сума: {newOrder.TotalPrice} грн\n");
     }
 }
-
-    
-    

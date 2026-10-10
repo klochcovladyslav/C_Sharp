@@ -1,6 +1,4 @@
 ﻿using System;
-using pr1.Base;
-
 namespace pr1.Models;
 
 
@@ -15,7 +13,7 @@ public class Laptop : Technologia
 
     public override void GetDescription()
     {
-        Console.WriteLine($"ID: {Id}, Назва: {Name}, Переносимий: {Transportable}, Ціна: {Price}");
+        Console.WriteLine($"ID: {Id}, Ноутбук: {Name}, Переносимий: {Transportable}, Ціна: {Price} грн");
     }
 }
 
