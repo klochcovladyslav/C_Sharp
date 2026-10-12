@@ -68,8 +68,29 @@ namespace pr1
             List<int> cart = new List<int> { 1, 3, 99 };
             //замовлення creation
             shopService.CreateOrder(client, cart);
+            
+           
+            
+            
+            
+            //звіт
+            Console.WriteLine("\n----- Оформлення звіту -----");
 
             
+            //експорт звіту
+            Console.WriteLine("\n--- Експорт звіту у файл ---");
+            shopService.GenerateReport("report.txt");
+
+            //читання та перевірка файлу
+            Console.WriteLine("\n--- Зчитування сформованого звіту ---");
+            ReportService.ReadAndVerifyReport("report.txt");
+
+            // бробка помилок I/O
+            Console.WriteLine("\n--- Демонстрація обробки помилових ситуацій I/O ---");
+            // Спроба прочитати неіснуючий файл (FileNotFoundException)
+            ReportService.ReadAndVerifyReport("67.txt");
+            // Спроба зберегти файл за некоректним шляхом (перевірка DirectoryNotFoundException)
+            ReportService.ExportShopReport("Z:/666/666.txt", new Repository<Technologia>(), new Repository<Order>());
 
             Console.WriteLine("\n==================================================");
             Console.WriteLine("             РОБОТУ ПРОГРАМИ ЗАВЕРШЕНО             ");

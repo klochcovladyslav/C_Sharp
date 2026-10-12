@@ -70,6 +70,7 @@ public class ShopService
         Console.WriteLine("---------------------------\n");
     }
     
+    
     public void CreateOrder(Customer customer, List<int> productIds)
     {
         int orderId = IdGenerator.NextId();
@@ -107,5 +108,10 @@ public class ShopService
             p.GetDescription();
         }
         Console.WriteLine($"Загальна сума: {newOrder.TotalPrice} грн\n");
+    }
+
+    public void GenerateReport(string fileName)
+    {
+        ReportService.ExportShopReport(fileName, _productRepository, _orderRepository);
     }
 }
