@@ -7,26 +7,27 @@ namespace pr2.Service;
 
 public class ReportService
 {
-    //Формування та експорт звіту у файл (текстовий / CSV)
+    //Формування та експорт звіту у файлік
     public static void ExportShopReport(string filePath, Repository<Technologia> productRepo, Repository<Order> orderRepo)
     {
         try
         {
-            using (StreamWriter writer = new StreamWriter(filePath, false, System.Text.Encoding.UTF8))
+            using (StreamWriter writer = new StreamWriter(filePath, true, System.Text.Encoding.UTF8))
             {
                 writer.WriteLine("==================================================");
                 writer.WriteLine("        ЗВІТ ПРО СТАН СИСТЕМИ МАЗАЗИНУ            ");
                 writer.WriteLine($"        Дата формування: {DateTime.Now}          ");
                 writer.WriteLine("==================================================\n");
-
+                
+                
                 var products = productRepo.GetAll();
-                writer.WriteLine("--- 1. ПОКАЗНИКИ СКЛАДУ ---");
+                writer.WriteLine("------СКЛАД------");
                 writer.WriteLine($"Загальна кількість товарів на складі: {products.Count}");
                 
                 var orders = orderRepo.GetAll();
                 writer.WriteLine($"Загальна кількість створених замовлень: {orders.Count}\n");
 
-                writer.WriteLine("--- 2. ПЕРЕЛІК ТОВАРІВ---");
+                writer.WriteLine("---ПЕРЕЛІК ТОВАРІВ---");
                 if (products.Count == 0)
                 {
                     writer.WriteLine("Товари відсутні.");
@@ -39,18 +40,18 @@ public class ReportService
                     }
                 }
 
-                writer.WriteLine("\n--- 3. СТАТИСТИКА ---");
-                decimal totalRevenue = 0;
+                writer.WriteLine("\n---СТАТИСТИКА---");
+                decimal total = 0;
                 foreach (var o in orders)
                 {
-                    totalRevenue += o.TotalPrice;
+                    total += o.TotalPrice;
                     writer.WriteLine($"Замовлення N{o.Id}, Покупець: {o.Buyer.Name}, Позицій: {o.Products.Count}, Сума: {o.TotalPrice} грн");
                 }
-                writer.WriteLine($"\nЗагальниц прибуток: {totalRevenue} грн");
+                writer.WriteLine($"\n Скуплено товарів на: {total} грн");
                 writer.WriteLine("==================================================");
             }
 
-            Console.WriteLine($"УСПІХ - Звіт успішно експортовано у файл: {filePath}");
+            Console.WriteLine($"УСПІХ - Звіт експортовано у файл: {filePath}");
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -58,7 +59,7 @@ public class ReportService
         }
         catch (DirectoryNotFoundException ex)
         {
-            Console.WriteLine($"НЕПРАВИЛЬНИЙ ШЛЯХ - Вказану директорію не знайдено: {ex.Message}");
+            Console.WriteLine($"НЕПРАВИЛЬНИЙ ШЛЯХ - Вказаний файл не знайдено: {ex.Message}");
         }
         catch (IOException ex)
         {
@@ -66,7 +67,7 @@ public class ReportService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ЯКАСЬ ПОМИЛКА {ex.Message}");
+            Console.WriteLine($"ПРОСТО ЯКАСЬ НЕПЕРЕДБАЧУВАНА ПОМИЛКА {ex.Message}");
         }
     }
 
@@ -80,11 +81,11 @@ public class ReportService
             {
                 throw new FileNotFoundException($"Файл за шляхом '{filePath}' не існує!");
             }
-
+            
             string[] lines = File.ReadAllLines(filePath, System.Text.Encoding.UTF8);
 
-            Console.WriteLine($"[УСПІХ] Файл знайдено. Кількість рядків у звіті: {lines.Length}");
-            Console.WriteLine("--- Вміст перших рядків звіту: ---");
+            Console.WriteLine($"Файл знайдено. Кількість рядків у звіті: {lines.Length}");
+            Console.WriteLine("--- Перші 15 рядків звіту ---");
             for (int i = 0; i < Math.Min(15, lines.Length); i++)
             {
                 Console.WriteLine(lines[i]);
@@ -101,7 +102,7 @@ public class ReportService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ЯКАСЬ ПОМИЛКА {ex.Message}");
+            Console.WriteLine($"ПРОСТО ЯКАСЬ ПОМИЛКА {ex.Message}");
         }
     }
 }
